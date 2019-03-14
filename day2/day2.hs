@@ -1,5 +1,8 @@
 alpha = ['a'..'z']
 
+testinput :: [String]
+testinput = ["abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz", "abcfe"]
+
 countChar :: Char -> String -> Int
 countChar e = length . (filter (== e))
 
@@ -14,31 +17,23 @@ part1 ids = pairs * trios
     pairs = length . (filter (>0)) $ map (findKChars 2) ids
     trios = length . (filter (>0)) $ map (findKChars 3) ids
 
--- ("abcd", ["aecd", "abed", ...])
--- ("aecd", ["abcd", "abed", ...])
---
---
--- ("abcd", [])
--- ("aecd", ["adcd"])
---
---
--- "acd"
+matchOne :: String -> String -> Bool
+matchOne x y = (== 1) . length . filter not $ zipWith (==) x y
 
-type Prototype = String
+excludeId :: String -> [String] -> [String]
+excludeId s = filter (/= s)
 
-testinput :: [String]
-testinput = ["abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz"]
+similarities :: String -> String -> String
+similarities x y = map fst . filter (\(a, b) -> a == b) $ zip x y
 
-fabricsMatchPairs :: [Prototype] -> [(Prototype, [Prototype])]
-fabricsMatchPairs fabrics = map (\fabric -> (fabric, filter (/= fabric) fabrics)) fabrics
-
--- findCandidates :: Prototype -> [Prototype] -> [Prototype]
--- findCandidates proto fabrics = filter (\(a, b) -> a /= b) $ map (\fabric -> zip proto fabric) fabrics
-findCandidates proto fabrics =  filter (\pairs -> length pairs == 1) $ map go $ map (\fabric -> zip proto fabric) fabrics
-  where
-    go = filter (\(a, b) -> a /= b)
+part2 :: [String] -> String
+part2 (x:xs) = if hasMatch then similarities match x else part2 xs
+  where match = head matches
+        hasMatch = (length matches) == 1
+        matches = filter (matchOne x) xs
 
 main = do
   input <- readFile "input.txt"
   putStrLn "Part1: "
   print (part1 $ lines input)
+  print (part2 $ lines input)
